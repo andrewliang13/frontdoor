@@ -1,0 +1,115 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T18:48:00Z",
+  "title": "Design System: Frontdoor",
+  "extensions": {
+    "colorMeta": {
+      "route": {
+        "role": "primary",
+        "displayName": "Route green",
+        "canonical": "#0E6B4F",
+        "tonalRamp": ["#06281E", "#0A3D2E", "#0E6B4F", "#1A8A68", "#3EAA88", "#7FCBB4", "#C5E6DB", "#F3FBF8"]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#1A1C19",
+        "tonalRamp": ["#1A1C19", "#2C302C", "#3E4540", "#5C6560", "#8A938E", "#C5D2CB", "#E7EEE9", "#F4F6F3"]
+      },
+      "key": {
+        "role": "accent",
+        "displayName": "Vermilion key",
+        "canonical": "#D23B2E",
+        "tonalRamp": ["#4A120E", "#7A221C", "#A32E24", "#D23B2E", "#E06A60", "#E99A93", "#F4C9C5", "#FBEDEC"]
+      }
+    },
+    "typographyMeta": {
+      "score": { "displayName": "Score figure", "purpose": "Overall and factor numbers, tabular." },
+      "body": { "displayName": "Schedule", "purpose": "Labels, details, and controls." }
+    },
+    "shadows": [
+      {
+        "name": "menu",
+        "value": "0 10px 24px rgba(16, 32, 24, 0.16)",
+        "purpose": "Shortlist menu only."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Panel slide, photo crossfade, and row arrival. Reduced motion removes the flyover and the count-up."
+      }
+    ],
+    "breakpoints": [
+      { "name": "narrow", "value": "800px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Score button",
+      "kind": "button",
+      "refersTo": "button-score",
+      "description": "Submits the address.",
+      "html": "<button class=\"ds-score\">Score</button>",
+      "css": ".ds-score { height: 36px; padding: 0 12px; border: 0; background: #F7FBF8; color: #0E6B4F; font-weight: 600; cursor: pointer; } .ds-score:hover { background: #FFFFFF; } .ds-score:focus-visible { outline: 2px solid #D23B2E; outline-offset: 2px; }"
+    },
+    {
+      "name": "Ghost button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Compare and Shortlist on the green bar.",
+      "html": "<button class=\"ds-ghost\" aria-pressed=\"false\">Compare</button>",
+      "css": ".ds-ghost { height: 36px; padding: 0 12px; background: transparent; color: #F7FBF8; border: 1px solid rgba(247, 251, 248, 0.55); cursor: pointer; } .ds-ghost:hover { background: rgba(247, 251, 248, 0.12); } .ds-ghost[aria-pressed='true'] { background: #F7FBF8; color: #0E6B4F; } .ds-ghost:focus-visible { outline: 2px solid #D23B2E; outline-offset: 2px; }"
+    },
+    {
+      "name": "Address field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "US address search.",
+      "html": "<input class=\"ds-field\" placeholder=\"US address\" />",
+      "css": ".ds-field { height: 36px; border: 0; background: #FFFFFF; color: #1A1C19; padding: 0 10px; caret-color: #0E6B4F; } .ds-field::placeholder { color: #3D4F47; } .ds-field:focus-visible { outline: 2px solid #D23B2E; outline-offset: 2px; }"
+    },
+    {
+      "name": "Column head",
+      "kind": "custom",
+      "refersTo": "column-head",
+      "description": "Overall figure for one address.",
+      "html": "<div class=\"ds-head\"><span class=\"ds-figure\">63</span></div>",
+      "css": ".ds-head { background: #0E6B4F; color: #F7FBF8; padding: 14px 16px; text-align: right; } .ds-figure { font-family: 'Barlow Condensed', sans-serif; font-size: 3rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 0.95; }"
+    },
+    {
+      "name": "Header",
+      "kind": "nav",
+      "refersTo": "button-ghost",
+      "description": "Route-green bar with the wordmark and search.",
+      "html": "<header class=\"ds-bar\"><strong class=\"ds-mark\">Frontdoor</strong></header>",
+      "css": ".ds-bar { display: flex; align-items: center; min-height: 56px; padding: 10px 12px; background: #0E6B4F; color: #F7FBF8; } .ds-mark { font-family: 'Barlow Condensed', sans-serif; font-size: 1.35rem; font-weight: 700; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "A commuter timetable on a map",
+    "overview": "The map is the task. The score is a timetable beside it: figures in columns, a not-covered row left in place and out of the average.",
+    "keyCharacteristics": [
+      "Route green owns the header and the column heads",
+      "Square corners and one-pixel rules",
+      "Tabular figures share one column",
+      "Vermilion only for the pin and the selected column"
+    ],
+    "rules": [
+      {
+        "name": "One column of figures",
+        "body": "The overall number and each factor number share a right-aligned tabular column.",
+        "section": "typography"
+      }
+    ],
+    "dos": [
+      "Keep the address field the primary action",
+      "Show source, year, and status on every factor"
+    ],
+    "donts": [
+      "Don't replace a number with a progress ring",
+      "Don't scrape listing photos"
+    ]
+  }
+}
