@@ -113,7 +113,6 @@ function FactorCell({
         {isCovered(factor) && factor.score !== null ? formatScore(factor.score) : "Not covered"}
       </span>
       {verbose ? <span className="cell-meta">{sourceLine(factor)}</span> : null}
-      {verbose && factor.detail ? <span className="detail">{factor.detail}</span> : null}
     </div>
   );
 }

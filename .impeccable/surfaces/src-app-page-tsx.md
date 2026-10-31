@@ -7,28 +7,28 @@ related_targets: []
 
 # Map
 
-Visitor mode: Operate.
+Mode: Operate.
 
-Audience: someone comparing a US address with where they need to be. Job: search, fly to the pin, read the score, compare a second address, keep a shortlist in the browser. No login.
+Audience: someone choosing a US home.
+Job: type any US address, read the live public-data score, compare a second address, save a shortlist in the browser.
+Task: search, fly to the pin, read every factor, move a weight, or reopen a saved place.
+Content: only `POST /api/place`, called twice when comparing. Empty `photos` stay an empty state with a link out.
+Constraints: no login, shortlist in localStorage, no scraped listing photos, no invented prices or coverage. MapLibre on OpenFreeMap. Reduced motion cuts the flyover and the count-up.
 
-Task: the map is the work surface. Search is the primary action. The left rail is street photos. The right panel is the score, then preferences. Proof is the factor row: number, year, source, and measured, modeled, or not covered.
+Direction: inspection line, chosen on the decision page. Memorable moment: each factor arrives as a checked, estimated, or NI line, and the match counts up as the sheet’s total.
 
-Constraints: MapLibre on OpenFreeMap, no key. Real fetch to `POST /api/place` and `POST /api/compare`. No bundled scores, no scraped listing photos. Reduced motion cuts the flyover and the count-up.
-
-Memorable moment: the pin arrives and the two column heads count up like clocks on a timetable.
-
-The decision page could not collect an answer in this unattended run. The assigned direction is the one that was built.
+Unresolved: school, park, transit, highway, and building outline draw only when a factor includes geometry. A pin with no geometry stays a pin.
 
 ## Direction contract
 
-THESIS: The score is a commuter timetable on a map. Two addresses are two columns under one service, and a factor with no reading stays on the row and out of the head number. This refuses the floating white score card on a generic map.
+THESIS: Each factor is a line on the inspection, marked checked, estimated, or NI, and a missed line stays on the sheet and out of the average. This refuses the floating score card.
 
-OWN-WORLD: Route green `#0E6B4F` owns the header and the flat column heads. Ink `#1A1C19` on `#F4F6F3`. Vermilion `#D23B2E` is only the column on the map and the active pin. Barlow sets the schedule; Barlow Condensed tabular figures set the numbers. Square corners, one-pixel rules, rows packed like stops. Centre rail: rules are one device pixel, and vermilion is a key, not a fill. One frame: a single street photo crossfades, source underneath. Dominant field: the column head is a flat route-green block. Shared grid: the overall figure and the factor figures share one right-aligned column. Weight as density: the slider fill is the weight, and a cell that cannot compare is a broken rule, not a new hue.
+OWN-WORLD: Carbon blue owns the bar. The sheet is form white. Graphite is the type. Not covered is an NI mark in madder. Measured is a drawn check. Modeled is a drawn estimate stroke. Source Sans 3, form-tight rows. The match is a total on the line.
 
-STORY: Type any US address, watch the map arrive at the door, and read which factors were measured, modeled, or not covered. Set an office, a mode, and weights. Put a second address in the next column. Save either one in this browser and open it back onto the map.
+STORY: They search a US address, the camera flies to the pin, and they read measured, modeled, and not covered. They set an office, a mode, and weights, compare a second address on those same weights, and save either place on this browser.
 
-FIRST VIEWPORT: The map fills the viewport, opened on the continental United States. A 56px route-green bar sits across the top: the word Frontdoor, the address field as the widest control and the primary action, Score, Compare, and Shortlist. Nothing else until a search. After a result, a 300px left rail slides in with one street photo and its source, and a right panel slides in, about 420px, or about 560px with two columns: green heads, the overall figures, ten hairline rows, then office, mode, sliders, and the sentence.
+FIRST VIEWPORT: The map fills the viewport on OpenFreeMap, centered on the continental US. A carbon-blue bar spans the top: the word Frontdoor, one address field as the primary action, Score, Compare, and Shortlist. No sheet and no photo rail until a result or a request in flight. Then the left rail holds street photos or the empty public-photo state, and the right sheet opens with the match total, the place name, and every factor line.
 
-FORM: Paper transit timetable, third on the resonance list, after the quadrangle sheet and the statistical abstract. seed:63bd8d3cc639a2bd
+FORM: Inspection line, first of the grounded list, the home inspection report. seed:10891a98e352f06a
 
-FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
