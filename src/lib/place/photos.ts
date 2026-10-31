@@ -13,8 +13,8 @@ export function googleMapsKey(): string | null {
 
 export async function loadPhotos(lat: number, lon: number): Promise<Photo[]> {
   const [mapillary, streetView] = await Promise.all([
-    mapillaryPhotos(lat, lon).catch(() => [] as Photo[]),
-    streetViewPhoto(lat, lon).catch(() => [] as Photo[]),
+    mapillaryPhotos(lat, lon),
+    streetViewPhoto(lat, lon),
   ]);
   return [...mapillary, ...streetView];
 }
@@ -22,36 +22,54 @@ export async function loadPhotos(lat: number, lon: number): Promise<Photo[]> {
 async function mapillaryPhotos(lat: number, lon: number): Promise<Photo[]> {
   const token = mapillaryToken();
   if (!token) return [];
-  const box = around(lat, lon, 0.05);
-  const params = new URLSearchParams({
-    fields: "id,thumb_1024_url,thumb_256_url,captured_at",
-    bbox: `${box.xmin},${box.ymin},${box.xmax},${box.ymax}`,
-    limit: "6",
-  });
-  const payload = await fetchJson(`https://graph.mapillary.com/images?${params}`, {
-    headers: { Authorization: `OAuth ${token}` },
-  });
-  const photos: Photo[] = [];
-  for (const item of asArray(asRecord(payload)?.data)) {
-    const record = asRecord(item);
-    const url = asString(record?.thumb_1024_url) ?? asString(record?.thumb_256_url);
-    if (!url || !url.startsWith("https://")) continue;
-    const year = captureYear(asNumber(record?.captured_at));
-    photos.push(year === undefined ? { url, source: "Mapillary" } : { url, source: "Mapillary", year });
+  try {
+    const box = around(lat, lon, 0.1);
+    const params = new URLSearchParams({
+      fields: "id,thumb_1024_url,thumb_256_url,captured_at",
+      bbox: `${box.xmin},${box.ymin},${box.xmax},${box.ymax}`,
+      limit: "4",
+    });
+    const payload = await fetchJson(
+      `https://graph.mapillary.com/images?${params}`,
+      { headers: { Authorization: `OAuth ${token}` } },
+      6000,
+    );
+    const photos: Photo[] = [];
+    for (const item of asArray(asRecord(payload)?.data)) {
+      const record = asRecord(item);
+      const id = asString(record?.id);
+      if (!id || !/^[0-9]{1,30}$/.test(id)) continue;
+      const thumb = asString(record?.thumb_1024_url) ?? asString(record?.thumb_256_url);
+      const year = captureYear(asNumber(record?.captured_at));
+      const publicThumb =
+        thumb &&
+        thumb.startsWith("https://") &&
+        !thumb.includes("access_token") &&
+        !thumb.includes(token)
+          ? thumb
+          : null;
+      const url = publicThumb ?? `/api/photo?mapillary=${encodeURIComponent(id)}`;
+      photos.push(year === undefined ? { url, source: "Mapillary" } : { url, source: "Mapillary", year });
+    }
+    return photos;
+  } catch {
+    return [];
   }
-  return photos;
 }
 
 async function streetViewPhoto(lat: number, lon: number): Promise<Photo[]> {
   const key = googleMapsKey();
   if (!key) return [];
-  const location = `${lat.toFixed(6)},${lon.toFixed(6)}`;
   const metadata = new URL("https://maps.googleapis.com/maps/api/streetview/metadata");
-  metadata.searchParams.set("location", location);
+  metadata.searchParams.set("location", `${lat},${lon}`);
   metadata.searchParams.set("source", "outdoor");
   metadata.searchParams.set("key", key);
-  const payload = await fetchJson(metadata.toString());
-  if (asString(asRecord(payload)?.status) !== "OK") return [];
+  try {
+    const payload = await fetchJson(metadata.toString(), undefined, 5000);
+    if (asString(asRecord(payload)?.status) !== "OK") return [];
+  } catch {
+    return [];
+  }
   const url =
     `/api/photo?lat=${encodeURIComponent(lat.toFixed(6))}` +
     `&lon=${encodeURIComponent(lon.toFixed(6))}`;
