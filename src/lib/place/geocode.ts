@@ -41,28 +41,95 @@ function fromCensus(payload: unknown): Located | null {
   };
 }
 
+const CENSUS_POINT =
+  "https://geocoding.geo.census.gov/geocoder/geographies/coordinates";
+
 async function census(address: string): Promise<Located | null> {
   const url = `${CENSUS}?address=${encodeURIComponent(address)}&benchmark=Public_AR_Current&vintage=Current_Current&format=json`;
-  const payload = await fetchJson(url);
-  return fromCensus(payload);
-}
-
-async function nominatimSuggestion(address: string): Promise<string | null> {
-  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=us&q=${encodeURIComponent(address)}`;
   try {
-    const payload = await fetchJson(url, undefined, 4000);
-    const hit = asRecord(asArray(payload)[0]);
-    return asString(hit?.display_name);
+    const payload = await fetchJson(url);
+    return fromCensus(payload);
   } catch {
     return null;
   }
 }
 
-/** Census is the pin. Nominatim may suggest a string when Census has no match. */
+type MapHit = {
+  lat: number;
+  lon: number;
+  /** A short street line Census can accept. The raw display name is too long and returns 400. */
+  line: string;
+};
+
+function finiteCoord(value: unknown): number | null {
+  const number = typeof value === "string" ? Number(value) : asNumber(value);
+  return number != null && Number.isFinite(number) ? number : null;
+}
+
+function streetLine(parts: Record<string, unknown> | null): string {
+  if (!parts) return "";
+  const street = [asString(parts.house_number), asString(parts.road)].filter(Boolean).join(" ");
+  const city =
+    asString(parts.city) ||
+    asString(parts.town) ||
+    asString(parts.village) ||
+    asString(parts.hamlet) ||
+    "";
+  const region = asString(parts["ISO3166-2-lvl4"])?.replace(/^US-/i, "") || asString(parts.state) || "";
+  const postcode = asString(parts.postcode) ?? "";
+  return [street, city, [region, postcode].filter(Boolean).join(" ")].filter(Boolean).join(", ");
+}
+
+async function nominatimHit(address: string): Promise<MapHit | null> {
+  const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=1&countrycodes=us&q=${encodeURIComponent(address)}`;
+  try {
+    const payload = await fetchJson(url, undefined, 4000);
+    const hit = asRecord(asArray(payload)[0]);
+    if (!hit) return null;
+    const lat = finiteCoord(hit.lat);
+    const lon = finiteCoord(hit.lon);
+    const line = streetLine(asRecord(hit.address)) || asString(hit.display_name) || "";
+    if (lat == null || lon == null || !line) return null;
+    if (lat < -15 || lat > 72 || lon < -180 || lon > 180) return null;
+    return { lat, lon, line };
+  } catch {
+    return null;
+  }
+}
+
+/** Census street match missed. Keep the map point and read state, county, and place from Census. */
+async function censusPoint(hit: MapHit): Promise<Located | null> {
+  const url = `${CENSUS_POINT}?x=${hit.lon}&y=${hit.lat}&benchmark=Public_AR_Current&vintage=Current_Current&format=json`;
+  try {
+    const payload = await fetchJson(url);
+    const result = asRecord(asRecord(payload)?.result);
+    const geographies = asRecord(result?.geographies);
+    if (!geographies) return null;
+    return fromCensus({
+      result: {
+        addressMatches: [
+          {
+            matchedAddress: hit.line,
+            coordinates: { x: hit.lon, y: hit.lat },
+            geographies,
+          },
+        ],
+      },
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** Census is the pin when it can match the line. A map hit is only the fallback point. */
 export async function geocodeAddress(address: string): Promise<Located | null> {
   const direct = await census(address);
   if (direct) return direct;
-  const suggestion = await nominatimSuggestion(address);
-  if (!suggestion || suggestion.toLowerCase() === address.trim().toLowerCase()) return null;
-  return census(suggestion);
+  const hit = await nominatimHit(address);
+  if (!hit) return null;
+  if (hit.line.toLowerCase() !== address.trim().toLowerCase()) {
+    const retried = await census(hit.line);
+    if (retried) return retried;
+  }
+  return censusPoint(hit);
 }

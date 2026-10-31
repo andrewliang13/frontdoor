@@ -129,16 +129,20 @@ export function fetchPlace(body: PlaceRequest, signal: AbortSignal): Promise<Pla
   return postJson("/api/place", body, signal, asPlace);
 }
 
-export async function fetchCompare(body: CompareRequest, signal: AbortSignal): Promise<CompareResult> {
-  const shared = {
-    office: body.office,
-    mode: body.mode,
-    weights: body.weights,
-    note: body.note,
+function asCompare(value: unknown, status: number): CompareResult {
+  if (!value || typeof value !== "object") {
+    throw new ScoreError(
+      "The score service returned something this page could not read.",
+      status,
+    );
+  }
+  const record = value as Partial<CompareResult>;
+  return {
+    first: asPlace(record.first, status),
+    second: asPlace(record.second, status),
   };
-  const [first, second] = await Promise.all([
-    fetchPlace({ ...shared, address: body.first }, signal),
-    fetchPlace({ ...shared, address: body.second }, signal),
-  ]);
-  return { first, second };
+}
+
+export function fetchCompare(body: CompareRequest, signal: AbortSignal): Promise<CompareResult> {
+  return postJson("/api/compare", body, signal, asCompare);
 }

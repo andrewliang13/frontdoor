@@ -79,10 +79,10 @@ function CountUp({ value }: { value: number | null }) {
 }
 
 function StatusMark({ factor }: { factor: Factor }) {
-  if (!isCovered(factor)) return <span className="mark mark-ni">NI</span>;
+  if (!isCovered(factor)) return <span className="status-mark mark-ni">NI</span>;
   if (factor.status === "modeled") {
     return (
-      <span className="mark mark-est">
+      <span className="status-mark mark-est">
         <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round">
           <path d="M2 9.2c2-3.2 3.2-3.2 5 0s3 3.2 5 0" />
         </svg>
@@ -90,7 +90,7 @@ function StatusMark({ factor }: { factor: Factor }) {
     );
   }
   return (
-    <span className="mark mark-ok">
+    <span className="status-mark mark-ok">
       <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
         <path d="M2.5 7.2 5.4 10.2 11.5 3.8" />
       </svg>

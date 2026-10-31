@@ -3,7 +3,6 @@ import { parsePreferences } from "@/lib/place/preferences";
 import { sanitizeWeights } from "@/lib/place/score";
 import type { PlaceMode, Weights } from "@/lib/place/types";
 
-export const runtime = "nodejs";
 export const maxDuration = 60;
 
 function asMode(value: unknown): PlaceMode | null {
